@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>04_vue</title>
+</head>
+
+<body>
+    <div id="app">
+    </div>
+</body>
+
+</html>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script>
+    Vue.component('C', {
+        template: `
+            <div>
+                <input type="text" v-model="$attrs.messagec" @input="passCData($attrs.messagec)">(C) </div>
+        `,
+
+        methods: {
+            passCData(val) {
+                //触发父组件A中的事件
+                this.$emit('getCData', val)
+            }
+        }
+    })
+
+    Vue.component('B', {
+        data() {
+            return {
+                mymessage: this.message
+            }
+        },
+        template: `
+            <div>
+                <input type="text" v-model="mymessage" @input="passData(mymessage)">(B)
+                <C v-bind="$attrs" v-on="$listeners"></C>
+            </div>
+        `,
+        props: ['message'],//得到父组件传递过来的数据
+        methods: {
+            passData(val) {
+                //触发父组件中的事件
+                this.$emit('getChildData', val)
+            }
+        }
+    })
+
+    Vue.component('A', {
+        template: `
+            <div>
+                <p>this is parent compoent!(A)</p>
+                <B :messagec="messagec" :message="message" v-on:getCData="getCData" v-on:getChildData="getChildData(message)"></B>
+            </div>
+        `,
+        data() {
+            return {
+                message: 'hello',
+                messagec: 'hello c' //传递给c组件的数据
+            }
+        },
+        methods: {
+            getChildData(val) {
+                console.log('这是来自B组件的数据')
+            },
+            //执行C子组件触发的事件
+            getCData(val) {
+                console.log("这是来自C组件的数据：" + val)
+            }
+        }
+    })
+
+    var app = new Vue({
+        el: '#app',
+        template: `
+            <div>
+                <A></A>
+            </div>
+        `
+    })
+</script>
